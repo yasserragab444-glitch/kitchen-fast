@@ -87,7 +87,7 @@ async function orders(){
 ${o.order_items.map(i=>`<div class="l"><span>${esc(i.product_name)} × ${w(i.quantity_kg)}</span><span>${n(i.line_total)} ج</span></div>`).join('')}
 <p>المجموع ${n(o.subtotal)} · خصم ${n(o.discount)}${o.coupon_code?' ('+esc(o.coupon_code)+')':''} · توصيل ${n(o.delivery_fee)}</p>
 <a class="b" target="_blank" rel="noopener" href="${wa(o,`مرحباً ${o.customer_name}، بخصوص طلبك ${o.order_number} من كيتشن فاست: ${ST[o.status]}`)}">واتساب العميل</a>
-${o.status=='delivered'?` <a class="b" target="_blank" rel="noopener" href="${wa(o,`شكراً لتعاملك مع كيتشن فاست! يسعدنا رأيك في طلبك: ${location.origin}/review.html?t=${o.review_token}`)}">إرسال رابط التقييم</a>`:''}</details></div>`).join(''):'<p class="m">لا توجد طلبات بعد.</p>';
+${o.status=='delivered'?` <a class="b" target="_blank" rel="noopener" href="${wa(o,`شكراً لتعاملك مع كيتشن فاست! يسعدنا رأيك في طلبك: ${location.origin}${location.pathname.replace(/[^/]*$/,'')}review.html?t=${o.review_token}`)}">إرسال رابط التقييم</a>`:''}</details></div>`).join(''):'<p class="m">لا توجد طلبات بعد.</p>';
 }
 
 let CATS=[];
