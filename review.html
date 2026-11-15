@@ -42,7 +42,7 @@ const rpc=async(fn,body)=>{
   if(!r.ok)throw new Error(j.message||'حدث خطأ، حاول تاني.');
   return j;
 };
-const head='<img class="logo" src="img/logo.jpg" alt="شعار كيتشن فاست">';
+const head='<img class="logo" src="img/logo.png" alt="شعار كيتشن فاست">';
 const msg=(t,d)=>{box.innerHTML=head+'<h1>'+t+'</h1><p class="mut">'+d+'</p>'};
 async function init(){
   if(!token)return msg('الرابط غير صحيح','اطلب رابط التقييم من كيتشن فاست على واتساب.');

@@ -146,7 +146,7 @@ aside.on{transform:none;visibility:visible}
 </form>
 </aside>
 <script>
-const IMG={logo:'img/logo.jpg',cubed:'img/cubed.jpg',kofta:'img/kofta.jpg',chick:'img/chick.jpg',sausage:'img/sausage.jpg',shish:'img/shish.jpg',samosa:'img/samosa.jpg',banner:'img/banner.jpg'};
+const IMG={logo:'img/logo.png',cubed:'img/cubed.jpg',kofta:'img/kofta.jpg',chick:'img/chick.jpg',sausage:'img/sausage.jpg',shish:'img/shish.jpg',samosa:'img/samosa.jpg',banner:'img/banner.jpg'};
 const SB='https://kqvoknmhokasppkwewoo.supabase.co',KEY='sb_publishable__6-VwjmP68SmIbxFGV3-dg_xSfCGdnr';let WA='201066989850';
 const CATS=[['all','الكل'],['meat','لحوم'],['chicken','فراخ'],['processed','مصنعات'],['appetizers','مقبلات']];
 const PIC={'شيش طاووق متبل مصري':'shish','فراخ متبلة (ورك)':'chick','بانيه متبل':'cubed','كفتة بلدي (لحم بقري)':'kofta','سجق بلدي':'sausage','سمبوسك':'samosa'};
@@ -203,6 +203,11 @@ fetch(SB+'/rest/v1/products?select=id,name,price_per_kg,discount_percent,is_avai
 fetch(SB+'/rest/v1/store_settings?select=whatsapp,payment_number,facebook_url&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{const s=d[0];if(!s)return;if(s.whatsapp){WA=s.whatsapp;document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+WA)}
 if(s.payment_number)document.querySelector('#pn b').textContent=s.payment_number;
 if(s.facebook_url)document.querySelectorAll('a[href*="facebook.com"]').forEach(a=>a.href=s.facebook_url)}).catch(()=>{});
+(function(){const e=document.querySelector('footer .cp');if(!e)return;let t;
+const go=()=>{t=setTimeout(()=>{location.href='admin.html'},800)},stop=()=>clearTimeout(t);
+e.addEventListener('pointerdown',go);['pointerup','pointerleave','pointercancel'].forEach(v=>e.addEventListener(v,stop));
+e.addEventListener('contextmenu',x=>x.preventDefault());
+e.style.userSelect='none';e.style.webkitUserSelect='none';e.style.webkitTouchCallout='none'})();
 </script>
 </body>
 </html>
