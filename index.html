@@ -63,6 +63,11 @@ h2{font-size:clamp(28px,4vw,40px);margin-bottom:8px}
 .fm{display:grid;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
 .fm input,.fm select,.fm textarea{background:#000;border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
 .fm label{font-size:15px;color:var(--mut)}
+.rv{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.rc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:6px;align-content:start}
+.rs{color:var(--gold);letter-spacing:2px}
+.rn{color:var(--mut);font-size:15px}
+.avg{display:flex;align-items:center;gap:10px;margin:0 0 22px}.avg b{font:700 34px 'El Messiri',serif;color:var(--gold)}
 .err{color:#ff7b72;font-size:15px;min-height:1em;margin:0}
 footer{border-top:1px solid var(--line);padding:36px 5vw;color:var(--mut)}
 footer .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;line-height:2}footer .cp{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);text-align:center;font-size:15px}.fl{width:72px;border-radius:10px;margin-bottom:6px}footer b{color:var(--tx)}
@@ -103,6 +108,7 @@ aside.on{transform:none;visibility:visible}
 <div class="tabs" id="tabs"></div>
 <div class="grid" id="grid"></div>
 </div></section>
+<section id="reviews" hidden><div class="wrap"><h2>آراء عملائنا</h2><div class="avg" id="avg"></div><div class="rv" id="rv"></div></div></section>
 <section id="occasions" style="background:#0c0c0c"><div class="wrap two">
 <div><h2>عزومة أو مناسبة؟</h2><p class="sub">قولنا إيه اللي محتاجه وعدد الأشخاص، ونتفق معاك على السعر ونجهزهولك.</p>
 <form class="fm" id="of">
@@ -203,6 +209,11 @@ fetch(SB+'/rest/v1/products?select=id,name,price_per_kg,discount_percent,is_avai
 fetch(SB+'/rest/v1/store_settings?select=whatsapp,payment_number,facebook_url&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{const s=d[0];if(!s)return;if(s.whatsapp){WA=s.whatsapp;document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+WA)}
 if(s.payment_number)document.querySelector('#pn b').textContent=s.payment_number;
 if(s.facebook_url)document.querySelectorAll('a[href*="facebook.com"]').forEach(a=>a.href=s.facebook_url)}).catch(()=>{});
+fetch(SB+'/rest/v1/rpc/get_approved_reviews',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(!d||!d.items||!d.items.length)return;
+const st=k=>'★'.repeat(k)+'☆'.repeat(5-k);
+$('avg').innerHTML=`<b>${n(d.avg)}</b><div><div class="rs" aria-hidden="true">${st(Math.round(d.avg))}</div><div class="rn">من ${n(d.count)} تقييم</div></div>`;
+$('rv').innerHTML=d.items.map(x=>`<article class="rc"><div class="rs" role="img" aria-label="${x.rating} من 5">${st(x.rating)}</div>${x.comment?`<p style="margin:0">${esc(x.comment)}</p>`:''}<div class="rn">${esc(x.name||'عميل')}</div></article>`).join('');
+$('reviews').hidden=false}).catch(()=>{});
 (function(){const e=document.querySelector('footer .cp');if(!e)return;let t;
 const go=()=>{t=setTimeout(()=>{location.href='admin.html'},800)},stop=()=>clearTimeout(t);
 e.addEventListener('pointerdown',go);['pointerup','pointerleave','pointercancel'].forEach(v=>e.addEventListener(v,stop));
