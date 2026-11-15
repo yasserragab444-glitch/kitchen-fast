@@ -138,7 +138,8 @@ aside.on{transform:none;visibility:visible}
 <button class="x" id="cx" aria-label="إغلاق">×</button>
 <h2>سلتك</h2>
 <div id="ci"><p class="sub">السلة فاضية.</p></div>
-<div class="tot"><span>الإجمالي</span><span id="ct">0 ج</span></div>
+<div class="tot"><span>إجمالي الأصناف</span><span id="ct">0 ج</span></div>
+<p class="note" style="margin:0 0 12px">مصاريف التوصيل بتتحدد حسب منطقتك، وهنأكدها معاك على واتساب مع تأكيد الطلب.</p>
 <div class="note" id="ok" hidden></div>
 <form class="fm" id="cf">
 <label>الاسم<input id="nm" autocomplete="name"></label>
@@ -159,7 +160,7 @@ const PIC={'شيش طاووق متبل مصري':'shish','فراخ متبلة (�
 const FB=[['chicken','شيش طاووق متبل مصري',280],['chicken','فراخ متبلة (ورك)',160],['chicken','بانيه متبل',260],['chicken','فرخة مسحب مخلية',200],['chicken','فرد حمام محشي جاهز للتسوية',160],['meat','كفتة بلدي (لحم بقري)',280],['meat','كبدة إسكندراني',250],['meat','كبدة بانيه متبلة',280],['meat','طرب ضاني',300],['processed','برجر',250],['processed','سجق بلدي',240],['processed','ممبار محشي',160],['appetizers','سمبوسك',170],['appetizers','محشي ورق عنب',200]].map(a=>({cat:a[0],name:a[1],price:a[2],ok:true}));
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const n=x=>(+x).toLocaleString('ar-EG');
+const n=x=>(+x).toLocaleString('en-US');
 const w=q=>q==.5?'نص كيلو':q==1?'كيلو':q==1.5?'كيلو ونص':q==2?'كيلوين':(q%1?Math.floor(q)+' كيلو ونص':q+' كيلو');
 let P=FB,cat='all',cart={},qty={};
 $('lg').src=IMG.logo;$('hl').src=IMG.logo;$('bn').src=IMG.banner;$('fl').src=IMG.logo;
@@ -196,7 +197,7 @@ const j=await r.json().catch(()=>({}));
 if(!r.ok){if(sb)sb.disabled=false;return $('er').textContent=j.message||'تعذر تسجيل الطلب، حاول تاني.'}
 R=j}catch(x){R=null}}
 let t=0;const L=R?R.items.map(i=>`- ${i.name}: ${w(i.kg)} = ${i.line_total} ج`).join('\n'):k.map(m=>{const c=cart[m];t+=c.price*c.q;return `- ${m}: ${w(c.q)} = ${c.price*c.q} ج`}).join('\n');
-const msg=`طلب جديد من كيتشن فاست${R?'\nرقم الطلب: '+R.order_number:''}\nالاسم: ${nm}\nالموبايل: ${ph}\nالعنوان: ${ad}\n\nالأصناف:\n${L}\n\nالإجمالي: ${R?R.total:t} ج\nالدفع: ${pm}${nt?'\nملاحظات: '+nt:''}`;
+const msg=`طلب جديد من كيتشن فاست${R?'\nرقم الطلب: '+R.order_number:''}\nالاسم: ${nm}\nالموبايل: ${ph}\nالعنوان: ${ad}\n\nالأصناف:\n${L}\n\nإجمالي الأصناف (بدون التوصيل): ${R?R.total:t} ج\nالدفع: ${pm}${nt?'\nملاحظات: '+nt:''}`;
 $('ok').innerHTML=`<b>${R?'تم تسجيل طلبك رقم '+esc(R.order_number)+'.':'تعذر الاتصال بالنظام.'}</b><br>اضغط الزر لإرسال الطلب على واتساب وتأكيده.<br><br><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}">أرسل الطلب على واتساب</a>`;
 $('ok').hidden=false;$('cf').hidden=true;$('cf').reset();cart={};rc();if(sb)sb.disabled=false};
 $('of').onsubmit=e=>{e.preventDefault();const p=$('op').value,d=$('od').value.trim();
@@ -211,7 +212,7 @@ if(s.payment_number)document.querySelector('#pn b').textContent=s.payment_number
 if(s.facebook_url)document.querySelectorAll('a[href*="facebook.com"]').forEach(a=>a.href=s.facebook_url)}).catch(()=>{});
 fetch(SB+'/rest/v1/rpc/get_approved_reviews',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(!d||!d.items||!d.items.length)return;
 const st=k=>'★'.repeat(k)+'☆'.repeat(5-k);
-$('avg').innerHTML=`<b>${n(d.avg)}</b><div><div class="rs" aria-hidden="true">${st(Math.round(d.avg))}</div><div class="rn">من ${n(d.count)} تقييم</div></div>`;
+$('avg').innerHTML=`<b dir="ltr">${(+d.avg).toFixed(1)}</b><div><div class="rs" aria-hidden="true">${st(Math.round(d.avg))}</div><div class="rn">من ${d.count} تقييم</div></div>`;
 $('rv').innerHTML=d.items.map(x=>`<article class="rc"><div class="rs" role="img" aria-label="${x.rating} من 5">${st(x.rating)}</div>${x.comment?`<p style="margin:0">${esc(x.comment)}</p>`:''}<div class="rn">${esc(x.name||'عميل')}</div></article>`).join('');
 $('reviews').hidden=false}).catch(()=>{});
 (function(){const e=document.querySelector('footer .cp');if(!e)return;let t;
