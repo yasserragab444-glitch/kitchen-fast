@@ -112,6 +112,19 @@ aside.on{transform:none;visibility:visible}
 @media(prefers-reduced-motion:reduce){.mq{animation:none;width:auto;margin:0 auto}.mg+.mg{display:none}}
 .bd.nw{inset-inline-start:auto;inset-inline-end:10px;background:var(--gold)}
 .pr s{color:var(--mut);font-weight:400;margin-inline-end:8px}
+#offb{position:fixed;inset-inline-start:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;align-items:center;height:56px;padding:0;border:1px solid var(--gold);border-radius:99px;background:rgba(10,10,10,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--gold);cursor:pointer;box-shadow:0 8px 28px #000a,0 0 0 1px #0008;font:inherit;opacity:0;visibility:hidden;transform:translateY(14px) scale(.92);pointer-events:none;transition:opacity .35s,transform .35s,visibility .35s}
+#offb.on{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+#offb::after{content:"";position:absolute;inset:-1px;border-radius:inherit;border:1px solid var(--gold);opacity:0;pointer-events:none;animation:ofp 6s ease-out infinite}
+@keyframes ofp{0%,70%{opacity:0;transform:scale(1)}76%{opacity:.7}100%{opacity:0;transform:scale(1.35)}}
+.ofk{width:54px;height:54px;display:grid;place-items:center;font:700 19px/1 'El Messiri',Tajawal,serif;letter-spacing:.5px}
+.ofl{max-width:0;overflow:hidden;white-space:nowrap;font-weight:700;font-size:15px;transition:max-width .45s,padding .45s}
+#offb.lb .ofl{max-width:90px;padding-inline-end:18px}
+#ofn{position:absolute;top:-7px;inset-inline-start:-5px;min-width:21px;height:21px;padding:0 5px;border-radius:99px;background:var(--gold);color:#000;font:700 12px/21px Tajawal,sans-serif;text-align:center;box-shadow:0 0 0 2px #000}
+#offb:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){#offb::after{animation:none}#offb{transition:none}}
+.lb2{background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:9px 14px;cursor:pointer;font:inherit;justify-self:start}
+.fm .ck{display:flex;gap:8px;align-items:center}.fm .ck input{width:auto}
+#gs{font-size:14px;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -174,13 +187,17 @@ aside.on{transform:none;visibility:visible}
 <label>الاسم<input id="nm" autocomplete="name"></label>
 <label>رقم الموبايل<input id="ph" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01xxxxxxxxx"></label>
 <label>العنوان (الجيزة)<textarea id="ad" rows="2"></textarea></label>
+<button type="button" class="lb2" id="gl">📍 حدد موقعي (اختياري)</button><span id="gs"></span>
+<label>أو الصق لينك موقعك (اختياري)<input id="lk" dir="ltr" inputmode="url" placeholder="https://maps.google.com/..."></label>
 <div class="pay"><label><input type="radio" name="py" value="كاش عند الاستلام" checked> كاش</label><label><input type="radio" name="py" value="إنستا باي"> إنستا باي</label><label><input type="radio" name="py" value="محفظة إلكترونية"> محفظة</label></div>
 <p class="note" id="pn" hidden>حوّل على <b dir="ltr">01066989850</b> وابعت صورة التحويل على واتساب مع الطلب.</p>
 <label>ملاحظات<input id="nt"></label>
+<label class="ck"><input type="checkbox" id="of2"> عايز أستقبل عروض كيتشن فاست على واتساب</label>
 <p class="err" id="er"></p>
 <button class="btn" type="submit">إتمام الطلب على واتساب</button>
 </form>
 </aside>
+<button id="offb" type="button" aria-label="العروض الجديدة"><span class="ofk">KF</span><span class="ofl">عروض</span><i id="ofn"></i></button>
 <script>
 const IMG={logo:'img/logo.png',cubed:'img/cubed.jpg',kofta:'img/kofta.jpg',chick:'img/chick.jpg',sausage:'img/sausage.jpg',shish:'img/shish.jpg',samosa:'img/samosa.jpg',banner:'img/banner.jpg'};
 const SB='https://kqvoknmhokasppkwewoo.supabase.co',KEY='sb_publishable__6-VwjmP68SmIbxFGV3-dg_xSfCGdnr';let WA='201066989850';
@@ -202,7 +219,12 @@ $('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;cat=b.data
 const BEST=['شيش طاووق متبل مصري','كفتة بلدي (لحم بقري)','فراخ متبلة (ورك)','سجق بلدي'];
 function card(p,b,o){const i=P.indexOf(p),q=qty[i]||.5,im=p.img||IMG[PIC[p.name]];
 return `<article class="pc${p.ok?'':' off'}"><div class="pi${im?'':' ph'}">${b?'<span class="bd">الأكثر طلباً</span>':''}${o?`<span class="bd">خصم ${Math.round((1-p.price/p.old)*100)}%</span>`:''}${p.nw?'<span class="bd nw">جديد</span>':''}<img src="${im||IMG.logo}" alt="${im?esc(p.name):''}" loading="lazy"></div><div class="pb"><h3>${esc(p.name)}</h3><div class="pr">${p.old>p.price?`<s>${n(p.old)}</s>`:''}${n(p.price)} ج / كيلو</div><div class="st"><button data-a="m" data-i="${i}" aria-label="تقليل">−</button><span>${w(q)}</span><button data-a="p" data-i="${i}" aria-label="زيادة">+</button></div><button class="add" data-a="add" data-i="${i}"${p.ok?'':' disabled'}>${p.ok?'أضف للسلة · '+n(p.price*q)+' ج':'غير متاح حالياً'}</button></div></article>`}
-function draw(){const O=P.filter(p=>p.old>p.price);$('offw').hidden=!O.length;$('offers').innerHTML=O.slice(0,8).map(p=>card(p,0,1)).join('');$('grid').innerHTML=P.filter(p=>cat=='all'||p.cat==cat).map(p=>card(p)).join('');$('best').innerHTML=(P.some(p=>p.best)?P.filter(p=>p.best):BEST.map(m=>P.find(p=>p.name==m)).filter(Boolean)).slice(0,8).map(p=>card(p,1)).join('')}
+var OFN=0,OFLB=0;
+function offVis(){var b=document.getElementById('offb'),s=document.getElementById('offw'),r=s.getBoundingClientRect(),v=r.top<innerHeight*.8&&r.bottom>innerHeight*.2,show=OFN>0&&scrollY>250&&!v;b.classList.toggle('on',show);if(show&&!OFLB){OFLB=1;b.classList.add('lb');setTimeout(function(){b.classList.remove('lb')},4200)}}
+function offUpd(c){OFN=c;document.getElementById('ofn').textContent=c;offVis()}
+addEventListener('scroll',offVis,{passive:true});addEventListener('resize',offVis);
+document.getElementById('offb').onclick=function(){document.getElementById('offw').scrollIntoView({behavior:'smooth',block:'start'})};
+function draw(){const O=P.filter(p=>p.old>p.price);$('offw').hidden=!O.length;offUpd(O.length);$('offers').innerHTML=O.slice(0,8).map(p=>card(p,0,1)).join('');$('grid').innerHTML=P.filter(p=>cat=='all'||p.cat==cat).map(p=>card(p)).join('');$('best').innerHTML=(P.some(p=>p.best)?P.filter(p=>p.best):BEST.map(m=>P.find(p=>p.name==m)).filter(Boolean)).slice(0,8).map(p=>card(p,1)).join('')}
 const gh=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,a=b.dataset.a,q=qty[i]||.5;
 if(a=='m')qty[i]=Math.max(.5,q-.5);else if(a=='p')qty[i]=q+.5;else{const p=P[i];cart[p.name]={id:p.id,price:p.price,q:(cart[p.name]?cart[p.name].q:0)+q};qty[i]=.5;opn()}
 draw();rc()};$('grid').onclick=gh;$('best').onclick=gh;$('offers').onclick=gh;
@@ -214,12 +236,15 @@ $('ci').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.da
 const opn=()=>{$('ok').hidden=true;$('cf').hidden=false;$('cart').classList.add('on');$('ov').classList.add('on')},cls=()=>{$('cart').classList.remove('on');$('ov').classList.remove('on')};
 $('cb').onclick=opn;$('cx').onclick=cls;$('ov').onclick=cls;document.onkeydown=e=>{if(e.key=='Escape')cls()};
 document.querySelectorAll('[name=py]').forEach(r=>r.onchange=()=>{$('pn').hidden=r.value=='كاش عند الاستلام'||!r.checked});
+var GL='';
+document.getElementById('gl').onclick=function(){var s=document.getElementById('gs');if(!navigator.geolocation){s.textContent='المتصفح مش بيدعم تحديد الموقع، الصق اللينك.';return}s.textContent='جاري تحديد الموقع...';navigator.geolocation.getCurrentPosition(function(p){GL='https://www.google.com/maps?q='+p.coords.latitude.toFixed(6)+','+p.coords.longitude.toFixed(6);s.textContent='تم تحديد موقعك ✓'},function(){GL='';s.textContent='تعذر تحديد الموقع، الصق اللينك أو اكتب العنوان بالتفصيل.'},{enableHighAccuracy:true,timeout:12000})};
 const send=t=>window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(t),'_blank');
-$('cf').onsubmit=async e=>{e.preventDefault();const k=Object.keys(cart),nm=$('nm').value.trim(),ph=$('ph').value.trim(),ad=$('ad').value.trim(),pm=document.querySelector('[name=py]:checked').value,nt=$('nt').value.trim();
+$('cf').onsubmit=async e=>{e.preventDefault();const k=Object.keys(cart),nm=$('nm').value.trim(),ph=$('ph').value.trim(),ad=$('ad').value.trim(),pm=document.querySelector('[name=py]:checked').value,lk=$('lk').value.trim(),loc=GL||lk,nt=[$('nt').value.trim(),loc?'📍 الموقع: '+loc:'',$('of2').checked?'📣 يقبل العروض':''].filter(Boolean).join('\n');
 if(!k.length)return $('er').textContent='ضيف صنف واحد على الأقل للسلة.';
 if(!nm)return $('er').textContent='اكتب اسمك.';
 if(!/^01\d{9}$/.test(ph))return $('er').textContent='رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01.';
 if(!ad)return $('er').textContent='اكتب عنوان التوصيل في الجيزة.';
+if(lk&&!/^https?:\/\//i.test(lk))return $('er').textContent='لينك الموقع لازم يبدأ بـ https://';
 const tt=rc();if(MIN&&tt<MIN)return $('er').textContent='الحد الأدنى للطلب '+n(MIN)+' ج.';
 $('er').textContent='';const sb=e.submitter;if(sb)sb.disabled=true;
 let R=null;
@@ -231,7 +256,7 @@ R=j}catch(x){R=null}}
 let t=0;const L=R?R.items.map(i=>`- ${i.name}: ${w(i.kg)} = ${i.line_total} ج`).join('\n'):k.map(m=>{const c=cart[m];t+=c.price*c.q;return `- ${m}: ${w(c.q)} = ${c.price*c.q} ج`}).join('\n');
 const msg=`طلب جديد من كيتشن فاست${R?'\nرقم الطلب: '+R.order_number:''}\nالاسم: ${nm}\nالموبايل: ${ph}\nالعنوان: ${ad}\n\nالأصناف:\n${L}\n\nإجمالي الأصناف (بدون التوصيل): ${R?R.total:t} ج\nالدفع: ${pm}${nt?'\nملاحظات: '+nt:''}`;
 $('ok').innerHTML=`<b>${R?'تم تسجيل طلبك رقم '+esc(R.order_number)+'.':'تعذر الاتصال بالنظام.'}</b><br>اضغط الزر لإرسال الطلب على واتساب وتأكيده.<br><br><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}">أرسل الطلب على واتساب</a>${R?`<br><br><a href="track.html?n=${encodeURIComponent(R.order_number)}" style="color:var(--gold)">تابع حالة طلبك</a>`:''}`;
-$('ok').hidden=false;$('cf').hidden=true;$('cf').reset();cart={};rc();if(sb)sb.disabled=false};
+$('ok').hidden=false;$('cf').hidden=true;$('cf').reset();GL='';$('gs').textContent='';cart={};rc();if(sb)sb.disabled=false};
 $('of').onsubmit=e=>{e.preventDefault();const p=$('op').value,d=$('od').value.trim();
 if(!(p>0))return $('oer').textContent='اكتب عدد الأشخاص.';
 if(!d)return $('oer').textContent='اكتب اللي محتاجه.';
