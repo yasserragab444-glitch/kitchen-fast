@@ -86,13 +86,22 @@ aside.on{transform:none;visibility:visible}
 .note{background:#1d1708;border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:15px}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(max-width:760px){nav{display:none}.fbk{margin-inline-start:auto}.two{grid-template-columns:1fr}}
-.ob{background:var(--gold);color:#000;text-align:center;font-weight:700;padding:6px 12px;font-size:15px}
+.ob{background:#0b0b0b;border-bottom:1px solid rgba(246,184,0,.22);overflow:hidden;color:#cfa72f;font-size:14px;height:36px;display:flex;align-items:center}
+.ob[hidden]{display:none}
+.mq{display:flex;width:max-content;direction:ltr;animation:mq var(--d,30s) linear infinite;will-change:transform}
+.mq:hover{animation-play-state:paused}
+.mg{display:flex;align-items:center;flex:none}
+.mi{white-space:nowrap;direction:rtl;unicode-bidi:isolate}
+.mb{white-space:nowrap;font:600 12px/1 'El Messiri',sans-serif;letter-spacing:.28em;color:var(--gold)}
+.ms{width:1px;height:14px;background:rgba(246,184,0,.35);margin:0 28px;flex:none}
+@keyframes mq{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.mq{animation:none;width:auto;margin:0 auto}.mg+.mg{display:none}}
 .bd.nw{inset-inline-start:auto;inset-inline-end:10px;background:var(--gold)}
 .pr s{color:var(--mut);font-weight:400;margin-inline-end:8px}
 </style>
 </head>
 <body>
-<div class="ob" id="ob" hidden></div>
+<div class="ob" id="ob" role="region" aria-label="العروض" hidden></div>
 <header>
 <a class="brand" href="#top"><img id="lg" alt="شعار كيتشن فاست"><span>كيتشن فاست</span></a>
 <nav><a href="#products">المنتجات</a><a href="#occasions">المناسبات</a><a href="#about">عن كيتشن فاست</a><a href="#contact">تواصل معنا</a></nav>
@@ -106,6 +115,7 @@ aside.on{transform:none;visibility:visible}
 <div class="hc"><img id="hl" alt="كيتشن فاست"><h1>متبل ومجهز للشوي</h1><p>لحوم وفراخ ومقبلات جاهزة للتسوية، توصلك طازجة لحد باب البيت في الجيزة.</p><a class="btn" href="#products">اطلب الآن</a></div>
 <div class="dots" id="dots"></div>
 </div>
+<section id="offw" hidden style="padding-bottom:0"><div class="wrap"><h2>العروض الجديدة</h2><p class="sub">خصومات لفترة محدودة على أصناف مختارة.</p><div class="grid" id="offers"></div></div></section>
 <section id="bestw" style="padding-bottom:0"><div class="wrap"><h2>الأكثر طلباً</h2><p class="sub">أصناف نرشحها لأول طلب ليك.</p><div class="grid" id="best"></div></div></section>
 <section id="products"><div class="wrap">
 <h2>منتجاتنا</h2><p class="sub">اختار الصنف والوزن، والأسعار بالكيلو.</p>
@@ -174,12 +184,12 @@ let hi=0;setInterval(()=>{const a=sl.children,d=dt.children;a[hi].classList.remo
 CATS.forEach(c=>$('tabs').insertAdjacentHTML('beforeend',`<button data-c="${c[0]}" class="${c[0]=='all'?'on':''}">${c[1]}</button>`));
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;cat=b.dataset.c;[...$('tabs').children].forEach(x=>x.classList.toggle('on',x==b));draw()};
 const BEST=['شيش طاووق متبل مصري','كفتة بلدي (لحم بقري)','فراخ متبلة (ورك)','سجق بلدي'];
-function card(p,b){const i=P.indexOf(p),q=qty[i]||.5,im=p.img||IMG[PIC[p.name]];
-return `<article class="pc${p.ok?'':' off'}"><div class="pi${im?'':' ph'}">${b?'<span class="bd">الأكثر طلباً</span>':''}${p.nw?'<span class="bd nw">جديد</span>':''}<img src="${im||IMG.logo}" alt="${im?esc(p.name):''}" loading="lazy"></div><div class="pb"><h3>${esc(p.name)}</h3><div class="pr">${p.old>p.price?`<s>${n(p.old)}</s>`:''}${n(p.price)} ج / كيلو</div><div class="st"><button data-a="m" data-i="${i}" aria-label="تقليل">−</button><span>${w(q)}</span><button data-a="p" data-i="${i}" aria-label="زيادة">+</button></div><button class="add" data-a="add" data-i="${i}"${p.ok?'':' disabled'}>${p.ok?'أضف للسلة · '+n(p.price*q)+' ج':'غير متاح حالياً'}</button></div></article>`}
-function draw(){$('grid').innerHTML=P.filter(p=>cat=='all'||p.cat==cat).map(p=>card(p)).join('');$('best').innerHTML=(P.some(p=>p.best)?P.filter(p=>p.best):BEST.map(m=>P.find(p=>p.name==m)).filter(Boolean)).slice(0,8).map(p=>card(p,1)).join('')}
+function card(p,b,o){const i=P.indexOf(p),q=qty[i]||.5,im=p.img||IMG[PIC[p.name]];
+return `<article class="pc${p.ok?'':' off'}"><div class="pi${im?'':' ph'}">${b?'<span class="bd">الأكثر طلباً</span>':''}${o?`<span class="bd">خصم ${Math.round((1-p.price/p.old)*100)}%</span>`:''}${p.nw?'<span class="bd nw">جديد</span>':''}<img src="${im||IMG.logo}" alt="${im?esc(p.name):''}" loading="lazy"></div><div class="pb"><h3>${esc(p.name)}</h3><div class="pr">${p.old>p.price?`<s>${n(p.old)}</s>`:''}${n(p.price)} ج / كيلو</div><div class="st"><button data-a="m" data-i="${i}" aria-label="تقليل">−</button><span>${w(q)}</span><button data-a="p" data-i="${i}" aria-label="زيادة">+</button></div><button class="add" data-a="add" data-i="${i}"${p.ok?'':' disabled'}>${p.ok?'أضف للسلة · '+n(p.price*q)+' ج':'غير متاح حالياً'}</button></div></article>`}
+function draw(){const O=P.filter(p=>p.old>p.price);$('offw').hidden=!O.length;$('offers').innerHTML=O.slice(0,8).map(p=>card(p,0,1)).join('');$('grid').innerHTML=P.filter(p=>cat=='all'||p.cat==cat).map(p=>card(p)).join('');$('best').innerHTML=(P.some(p=>p.best)?P.filter(p=>p.best):BEST.map(m=>P.find(p=>p.name==m)).filter(Boolean)).slice(0,8).map(p=>card(p,1)).join('')}
 const gh=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,a=b.dataset.a,q=qty[i]||.5;
 if(a=='m')qty[i]=Math.max(.5,q-.5);else if(a=='p')qty[i]=q+.5;else{const p=P[i];cart[p.name]={id:p.id,price:p.price,q:(cart[p.name]?cart[p.name].q:0)+q};qty[i]=.5;opn()}
-draw();rc()};$('grid').onclick=gh;$('best').onclick=gh;
+draw();rc()};$('grid').onclick=gh;$('best').onclick=gh;$('offers').onclick=gh;
 function rc(){const k=Object.keys(cart);let t=0;$('cn').textContent=n(k.length);
 $('ci').innerHTML=k.length?k.map(m=>{const c=cart[m];t+=c.price*c.q;return `<div class="ci"><b>${esc(m)}</b><span>${n(c.price*c.q)} ج</span><div class="st"><button data-a="m" data-k="${esc(m)}" aria-label="تقليل">−</button><span>${w(c.q)}</span><button data-a="p" data-k="${esc(m)}" aria-label="زيادة">+</button></div></div>`}).join(''):'<p class="sub">السلة فاضية.</p>';
 $('ct').textContent=n(t)+' ج';$('mn').hidden=!(MIN&&t>0&&t<MIN);$('mn').textContent='الحد الأدنى للطلب '+n(MIN)+' ج';return t}
@@ -214,12 +224,18 @@ const H={headers:{apikey:KEY}};
 fetch(SB+'/rest/v1/products?select=id,name,price_per_kg,discount_percent,is_available,image_url,is_best_seller,is_new,categories(slug)&order=sort_order',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(d.length){P=d.map(x=>({id:x.id,cat:x.categories&&x.categories.slug,name:x.name,price:Math.round(x.price_per_kg*(1-x.discount_percent/100)*100)/100,ok:x.is_available,img:x.image_url,best:x.is_best_seller,old:+x.price_per_kg,nw:x.is_new}));draw()}}).catch(()=>{});
 const safe=u=>/^https?:\/\//i.test(u||'');
 const IC={instagram:'<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="7" r="1.2" fill="currentColor"/>',tiktok:'<path d="M14 4v10.2a3.2 3.2 0 1 1-3.2-3.2M14 4c.3 2.3 1.9 3.9 4.2 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',location:'<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 1 1 13 0c0 5-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/>'};
+function setBanner(x){const m=x.split(/[|\n]/).map(v=>v.trim()).filter(Boolean);if(!m.length)return;
+const u=m.map(v=>`<span class="mb">KITCHEN FAST</span><i class="ms"></i><span class="mi">${esc(v)}</span><i class="ms"></i>`).join(''),b=$('ob');
+b.innerHTML='<div class="mq"><div class="mg">'+u+'</div></div>';b.hidden=false;
+const q=b.firstChild,g=q.firstChild,r=Math.max(1,Math.ceil(innerWidth/(g.scrollWidth||300))),c=u.repeat(r);
+g.innerHTML=c;q.insertAdjacentHTML('beforeend','<div class="mg" aria-hidden="true">'+c+'</div>');
+q.style.setProperty('--d',Math.max(18,Math.round(g.scrollWidth/55))+'s')}
 function setHero(u){sl.innerHTML='';dt.innerHTML='';hi=0;u.forEach((x,i)=>{sl.insertAdjacentHTML('beforeend',`<div class="sl${i?'':' on'}" style="background-image:url('${encodeURI(x).replace(/['()]/g,escape)}')"></div>`);dt.insertAdjacentHTML('beforeend',`<i class="${i?'':'on'}"></i>`)})}
 fetch(SB+'/rest/v1/store_settings?select=whatsapp,payment_number,facebook_url,instagram_url,tiktok_url,location_url,address,working_hours,offers_banner,min_order,tagline,hero_images&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{const s=d[0];if(!s)return;
 if(s.whatsapp){WA=s.whatsapp;document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+WA)}
 if(s.payment_number)document.querySelector('#pn b').textContent=s.payment_number;
 if(safe(s.facebook_url))document.querySelectorAll('a[href*="facebook.com"]').forEach(a=>a.href=s.facebook_url);
-if(s.offers_banner){$('ob').textContent=s.offers_banner;$('ob').hidden=false}
+if(s.offers_banner)setBanner(s.offers_banner);
 if(s.tagline)document.querySelector('.hc h1').textContent=s.tagline;
 if(s.hero_images&&s.hero_images.length)setHero(s.hero_images);
 MIN=+s.min_order||0;rc();

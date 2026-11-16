@@ -113,7 +113,7 @@ async function reviews(){
   V.innerHTML=d.length?d.map(r=>`<div class="c" data-id="${r.id}"><div class="r"><b class="g">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</b><span>${esc(r.customer_name)} · ${esc(r.orders?.order_number||'')}</span><span class="${r.is_approved?'g':'m'}">${r.is_approved?'ظاهر':'بانتظار الموافقة'}</span></div><p>${esc(r.comment||'')}</p><div class="r"><button class="b" data-a="ap" data-v="${r.is_approved?0:1}">${r.is_approved?'إخفاء':'اعتماد'}</button><button class="b d" data-a="rd">حذف</button></div></div>`).join(''):'<p class="m">لا توجد تقييمات بعد.</p>';
 }
 
-const SF=[['tagline','الشعار'],['whatsapp','رقم واتساب (بصيغة 20...)'],['payment_number','رقم التحويل (إنستا باي / محفظة)'],['facebook_url','رابط فيسبوك'],['instagram_url','رابط إنستغرام'],['tiktok_url','رابط تيك توك'],['location_url','رابط اللوكيشن'],['address','العنوان'],['working_hours','مواعيد العمل'],['offers_banner','شريط العروض'],['min_order','الحد الأدنى للطلب (ج)']];
+const SF=[['tagline','الشعار'],['whatsapp','رقم واتساب (بصيغة 20...)'],['payment_number','رقم التحويل (إنستا باي / محفظة)'],['facebook_url','رابط فيسبوك'],['instagram_url','رابط إنستغرام'],['tiktok_url','رابط تيك توك'],['location_url','رابط اللوكيشن'],['address','العنوان'],['working_hours','مواعيد العمل'],['offers_banner','شريط العروض (افصل بين أكتر من رسالة بعلامة |)'],['min_order','الحد الأدنى للطلب (ج)']];
 let HERO=[];
 function drawHero(){$('hr').innerHTML=HERO.map((u,i)=>`<span><img class="th" src="${esc(u)}" alt=""><button class="b d" data-a="hrm" data-i="${i}">×</button></span>`).join('')||'<span class="m">لا توجد صور</span>'}
 async function settings(){
