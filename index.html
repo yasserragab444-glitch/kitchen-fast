@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>كيتشن فاست | KITCHEN FAST – Less Prep, More Enjoyment.</title>
+<title>كيتشن فاست | متبل ومجهز للشوي</title>
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#000;--card:#131313;--line:#2b2b2b;--tx:#f5f3ee;--mut:#a9a69d;--gold:#f6b800;--fire:#ff6a1a;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -86,9 +86,13 @@ aside.on{transform:none;visibility:visible}
 .note{background:#1d1708;border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:15px}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(max-width:760px){nav{display:none}.fbk{margin-inline-start:auto}.two{grid-template-columns:1fr}}
+.ob{background:var(--gold);color:#000;text-align:center;font-weight:700;padding:6px 12px;font-size:15px}
+.bd.nw{inset-inline-start:auto;inset-inline-end:10px;background:var(--gold)}
+.pr s{color:var(--mut);font-weight:400;margin-inline-end:8px}
 </style>
 </head>
 <body>
+<div class="ob" id="ob" hidden></div>
 <header>
 <a class="brand" href="#top"><img id="lg" alt="شعار كيتشن فاست"><span>كيتشن فاست</span></a>
 <nav><a href="#products">المنتجات</a><a href="#occasions">المناسبات</a><a href="#about">عن كيتشن فاست</a><a href="#contact">تواصل معنا</a></nav>
@@ -138,8 +142,8 @@ aside.on{transform:none;visibility:visible}
 <button class="x" id="cx" aria-label="إغلاق">×</button>
 <h2>سلتك</h2>
 <div id="ci"><p class="sub">السلة فاضية.</p></div>
-<div class="tot"><span>إجمالي الأصناف</span><span id="ct">0 ج</span></div>
-<p class="note" style="margin:0 0 12px">مصاريف التوصيل بتتحدد حسب منطقتك، وهنأكدها معاك على واتساب مع تأكيد الطلب.</p>
+<div class="tot"><span>الإجمالي</span><span id="ct">0 ج</span></div>
+<p class="sub" id="mn" hidden></p>
 <div class="note" id="ok" hidden></div>
 <form class="fm" id="cf">
 <label>الاسم<input id="nm" autocomplete="name"></label>
@@ -162,7 +166,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=x=>(+x).toLocaleString('en-US');
 const w=q=>q==.5?'نص كيلو':q==1?'كيلو':q==1.5?'كيلو ونص':q==2?'كيلوين':(q%1?Math.floor(q)+' كيلو ونص':q+' كيلو');
-let P=FB,cat='all',cart={},qty={};
+let P=FB,cat='all',cart={},qty={},MIN=0;
 $('lg').src=IMG.logo;$('hl').src=IMG.logo;$('bn').src=IMG.banner;$('fl').src=IMG.logo;
 const hero=['cubed','kofta','chick','sausage'],sl=$('slides'),dt=$('dots');
 hero.forEach((k,i)=>{sl.insertAdjacentHTML('beforeend',`<div class="sl${i?'':' on'}" style="background-image:url(${IMG[k]})"></div>`);dt.insertAdjacentHTML('beforeend',`<i class="${i?'':'on'}"></i>`)});
@@ -171,14 +175,14 @@ CATS.forEach(c=>$('tabs').insertAdjacentHTML('beforeend',`<button data-c="${c[0]
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;cat=b.dataset.c;[...$('tabs').children].forEach(x=>x.classList.toggle('on',x==b));draw()};
 const BEST=['شيش طاووق متبل مصري','كفتة بلدي (لحم بقري)','فراخ متبلة (ورك)','سجق بلدي'];
 function card(p,b){const i=P.indexOf(p),q=qty[i]||.5,im=p.img||IMG[PIC[p.name]];
-return `<article class="pc${p.ok?'':' off'}"><div class="pi${im?'':' ph'}">${b?'<span class="bd">الأكثر طلباً</span>':''}<img src="${im||IMG.logo}" alt="${im?esc(p.name):''}" loading="lazy"></div><div class="pb"><h3>${esc(p.name)}</h3><div class="pr">${n(p.price)} ج / كيلو</div><div class="st"><button data-a="m" data-i="${i}" aria-label="تقليل">−</button><span>${w(q)}</span><button data-a="p" data-i="${i}" aria-label="زيادة">+</button></div><button class="add" data-a="add" data-i="${i}"${p.ok?'':' disabled'}>${p.ok?'أضف للسلة · '+n(p.price*q)+' ج':'غير متاح حالياً'}</button></div></article>`}
+return `<article class="pc${p.ok?'':' off'}"><div class="pi${im?'':' ph'}">${b?'<span class="bd">الأكثر طلباً</span>':''}${p.nw?'<span class="bd nw">جديد</span>':''}<img src="${im||IMG.logo}" alt="${im?esc(p.name):''}" loading="lazy"></div><div class="pb"><h3>${esc(p.name)}</h3><div class="pr">${p.old>p.price?`<s>${n(p.old)}</s>`:''}${n(p.price)} ج / كيلو</div><div class="st"><button data-a="m" data-i="${i}" aria-label="تقليل">−</button><span>${w(q)}</span><button data-a="p" data-i="${i}" aria-label="زيادة">+</button></div><button class="add" data-a="add" data-i="${i}"${p.ok?'':' disabled'}>${p.ok?'أضف للسلة · '+n(p.price*q)+' ج':'غير متاح حالياً'}</button></div></article>`}
 function draw(){$('grid').innerHTML=P.filter(p=>cat=='all'||p.cat==cat).map(p=>card(p)).join('');$('best').innerHTML=(P.some(p=>p.best)?P.filter(p=>p.best):BEST.map(m=>P.find(p=>p.name==m)).filter(Boolean)).slice(0,8).map(p=>card(p,1)).join('')}
 const gh=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,a=b.dataset.a,q=qty[i]||.5;
 if(a=='m')qty[i]=Math.max(.5,q-.5);else if(a=='p')qty[i]=q+.5;else{const p=P[i];cart[p.name]={id:p.id,price:p.price,q:(cart[p.name]?cart[p.name].q:0)+q};qty[i]=.5;opn()}
 draw();rc()};$('grid').onclick=gh;$('best').onclick=gh;
 function rc(){const k=Object.keys(cart);let t=0;$('cn').textContent=n(k.length);
 $('ci').innerHTML=k.length?k.map(m=>{const c=cart[m];t+=c.price*c.q;return `<div class="ci"><b>${esc(m)}</b><span>${n(c.price*c.q)} ج</span><div class="st"><button data-a="m" data-k="${esc(m)}" aria-label="تقليل">−</button><span>${w(c.q)}</span><button data-a="p" data-k="${esc(m)}" aria-label="زيادة">+</button></div></div>`}).join(''):'<p class="sub">السلة فاضية.</p>';
-$('ct').textContent=n(t)+' ج';return t}
+$('ct').textContent=n(t)+' ج';$('mn').hidden=!(MIN&&t>0&&t<MIN);$('mn').textContent='الحد الأدنى للطلب '+n(MIN)+' ج';return t}
 $('ci').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,c=cart[k];if(!c)return;c.q+=b.dataset.a=='p'?.5:-.5;if(c.q<.5)delete cart[k];rc()};
 const opn=()=>{$('ok').hidden=true;$('cf').hidden=false;$('cart').classList.add('on');$('ov').classList.add('on')},cls=()=>{$('cart').classList.remove('on');$('ov').classList.remove('on')};
 $('cb').onclick=opn;$('cx').onclick=cls;$('ov').onclick=cls;document.onkeydown=e=>{if(e.key=='Escape')cls()};
@@ -189,6 +193,7 @@ if(!k.length)return $('er').textContent='ضيف صنف واحد على الأق�
 if(!nm)return $('er').textContent='اكتب اسمك.';
 if(!/^01\d{9}$/.test(ph))return $('er').textContent='رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01.';
 if(!ad)return $('er').textContent='اكتب عنوان التوصيل في الجيزة.';
+const tt=rc();if(MIN&&tt<MIN)return $('er').textContent='الحد الأدنى للطلب '+n(MIN)+' ج.';
 $('er').textContent='';const sb=e.submitter;if(sb)sb.disabled=true;
 let R=null;
 if(k.every(m=>cart[m].id)){try{
@@ -197,7 +202,7 @@ const j=await r.json().catch(()=>({}));
 if(!r.ok){if(sb)sb.disabled=false;return $('er').textContent=j.message||'تعذر تسجيل الطلب، حاول تاني.'}
 R=j}catch(x){R=null}}
 let t=0;const L=R?R.items.map(i=>`- ${i.name}: ${w(i.kg)} = ${i.line_total} ج`).join('\n'):k.map(m=>{const c=cart[m];t+=c.price*c.q;return `- ${m}: ${w(c.q)} = ${c.price*c.q} ج`}).join('\n');
-const msg=`طلب جديد من كيتشن فاست${R?'\nرقم الطلب: '+R.order_number:''}\nالاسم: ${nm}\nالموبايل: ${ph}\nالعنوان: ${ad}\n\nالأصناف:\n${L}\n\nإجمالي الأصناف (بدون التوصيل): ${R?R.total:t} ج\nالدفع: ${pm}${nt?'\nملاحظات: '+nt:''}`;
+const msg=`طلب جديد من كيتشن فاست${R?'\nرقم الطلب: '+R.order_number:''}\nالاسم: ${nm}\nالموبايل: ${ph}\nالعنوان: ${ad}\n\nالأصناف:\n${L}\n\nالإجمالي: ${R?R.total:t} ج\nالدفع: ${pm}${nt?'\nملاحظات: '+nt:''}`;
 $('ok').innerHTML=`<b>${R?'تم تسجيل طلبك رقم '+esc(R.order_number)+'.':'تعذر الاتصال بالنظام.'}</b><br>اضغط الزر لإرسال الطلب على واتساب وتأكيده.<br><br><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}">أرسل الطلب على واتساب</a>`;
 $('ok').hidden=false;$('cf').hidden=true;$('cf').reset();cart={};rc();if(sb)sb.disabled=false};
 $('of').onsubmit=e=>{e.preventDefault();const p=$('op').value,d=$('od').value.trim();
@@ -206,10 +211,23 @@ if(!d)return $('oer').textContent='اكتب اللي محتاجه.';
 $('oer').textContent='';send(`طلب مناسبة من كيتشن فاست\nالمناسبة: ${$('oe').value}\nعدد الأشخاص: ${p}\nالمطلوب: ${d}\n\nنرجو تحديد السعر.`)};
 draw();rc();
 const H={headers:{apikey:KEY}};
-fetch(SB+'/rest/v1/products?select=id,name,price_per_kg,discount_percent,is_available,image_url,is_best_seller,categories(slug)&order=sort_order',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(d.length){P=d.map(x=>({id:x.id,cat:x.categories&&x.categories.slug,name:x.name,price:Math.round(x.price_per_kg*(1-x.discount_percent/100)*100)/100,ok:x.is_available,img:x.image_url,best:x.is_best_seller}));draw()}}).catch(()=>{});
-fetch(SB+'/rest/v1/store_settings?select=whatsapp,payment_number,facebook_url&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{const s=d[0];if(!s)return;if(s.whatsapp){WA=s.whatsapp;document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+WA)}
+fetch(SB+'/rest/v1/products?select=id,name,price_per_kg,discount_percent,is_available,image_url,is_best_seller,is_new,categories(slug)&order=sort_order',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(d.length){P=d.map(x=>({id:x.id,cat:x.categories&&x.categories.slug,name:x.name,price:Math.round(x.price_per_kg*(1-x.discount_percent/100)*100)/100,ok:x.is_available,img:x.image_url,best:x.is_best_seller,old:+x.price_per_kg,nw:x.is_new}));draw()}}).catch(()=>{});
+const safe=u=>/^https?:\/\//i.test(u||'');
+const IC={instagram:'<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="7" r="1.2" fill="currentColor"/>',tiktok:'<path d="M14 4v10.2a3.2 3.2 0 1 1-3.2-3.2M14 4c.3 2.3 1.9 3.9 4.2 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',location:'<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 1 1 13 0c0 5-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/>'};
+function setHero(u){sl.innerHTML='';dt.innerHTML='';hi=0;u.forEach((x,i)=>{sl.insertAdjacentHTML('beforeend',`<div class="sl${i?'':' on'}" style="background-image:url('${encodeURI(x).replace(/['()]/g,escape)}')"></div>`);dt.insertAdjacentHTML('beforeend',`<i class="${i?'':'on'}"></i>`)})}
+fetch(SB+'/rest/v1/store_settings?select=whatsapp,payment_number,facebook_url,instagram_url,tiktok_url,location_url,address,working_hours,offers_banner,min_order,tagline,hero_images&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{const s=d[0];if(!s)return;
+if(s.whatsapp){WA=s.whatsapp;document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+WA)}
 if(s.payment_number)document.querySelector('#pn b').textContent=s.payment_number;
-if(s.facebook_url)document.querySelectorAll('a[href*="facebook.com"]').forEach(a=>a.href=s.facebook_url)}).catch(()=>{});
+if(safe(s.facebook_url))document.querySelectorAll('a[href*="facebook.com"]').forEach(a=>a.href=s.facebook_url);
+if(s.offers_banner){$('ob').textContent=s.offers_banner;$('ob').hidden=false}
+if(s.tagline)document.querySelector('.hc h1').textContent=s.tagline;
+if(s.hero_images&&s.hero_images.length)setHero(s.hero_images);
+MIN=+s.min_order||0;rc();
+const f=document.querySelector('#contact .fg>div:first-child'),so=document.querySelector('#contact .so');
+if(s.address)f.insertAdjacentHTML('beforeend','<br>العنوان: '+esc(s.address));
+if(s.working_hours)f.insertAdjacentHTML('beforeend','<br>مواعيد العمل: '+esc(s.working_hours));
+[['instagram_url','instagram','إنستغرام'],['tiktok_url','tiktok','تيك توك'],['location_url','location','موقعنا على الخريطة']].forEach(([k,i,l])=>{if(safe(s[k]))so.insertAdjacentHTML('beforeend',`<a class="fbk" href="${esc(s[k])}" target="_blank" rel="noopener" aria-label="${l}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">${IC[i]}</svg></a>`)})
+}).catch(()=>{});
 fetch(SB+'/rest/v1/rpc/get_approved_reviews',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(!d||!d.items||!d.items.length)return;
 const st=k=>'★'.repeat(k)+'☆'.repeat(5-k);
 $('avg').innerHTML=`<b dir="ltr">${(+d.avg).toFixed(1)}</b><div><div class="rs" aria-hidden="true">${st(Math.round(d.avg))}</div><div class="rn">من ${d.count} تقييم</div></div>`;

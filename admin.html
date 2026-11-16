@@ -54,12 +54,11 @@ summary{cursor:pointer;color:var(--gold)}
 const sb=supabase.createClient('https://kqvoknmhokasppkwewoo.supabase.co','sb_publishable__6-VwjmP68SmIbxFGV3-dg_xSfCGdnr');
 const $=id=>document.getElementById(id),V=$('v');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const n=x=>(+x).toLocaleString('ar-EG');
+const n=x=>(+x).toLocaleString('en-US');
 const ok=r=>{if(r.error)throw r.error;return r.data};
 const ST={new:'جديد',review:'قيد المراجعة',confirmed:'تم التأكيد',preparing:'قيد التجهيز',out:'خرج للتوصيل',delivered:'تم التسليم',cancelled:'ملغي'};
 const wa=(o,t)=>`https://wa.me/20${o.phone.slice(1)}?text=${encodeURIComponent(t)}`;
 const w=q=>+q==.5?'نص كيلو':n(q)+' كيلو';
-const feeTxt=o=>+o.delivery_fee>0?`\nالأصناف: ${o.subtotal-(o.discount||0)} ج + التوصيل: ${o.delivery_fee} ج\nالإجمالي: ${o.total} ج`:'';
 function toast(m,bad){const t=$('t');t.textContent=m;t.className='on'+(bad?' bad':'');clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2800)}
 const fail=e=>toast(e.message||'حدث خطأ',1);
 const TABS={orders:['الطلبات',orders],products:['المنتجات',products],reviews:['التقييمات',reviews],settings:['الإعدادات',settings]};
@@ -82,13 +81,12 @@ sb.auth.getSession().then(({data})=>{if(data.session)enter()});
 
 async function orders(){
   const d=ok(await sb.from('orders').select('*,order_items(*)').order('created_at',{ascending:false}).limit(100));
-  V.innerHTML=d.length?d.map(o=>`<div class="c" data-id="${o.id}" data-sub="${o.subtotal}" data-disc="${o.discount||0}"><div class="r"><b>${esc(o.order_number)}</b><span>${esc(o.customer_name)} · <span dir="ltr">${esc(o.phone)}</span></span><b class="g">${n(o.total)} ج</b>
+  V.innerHTML=d.length?d.map(o=>`<div class="c" data-id="${o.id}"><div class="r"><b>${esc(o.order_number)}</b><span>${esc(o.customer_name)} · <span dir="ltr">${esc(o.phone)}</span></span><b class="g">${n(o.total)} ج</b>
 <select data-a="st">${Object.entries(ST).map(([k,v])=>`<option value="${k}"${o.status==k?' selected':''}>${v}</option>`).join('')}</select></div>
-<details><summary>التفاصيل</summary><p>${new Date(o.created_at).toLocaleString('ar-EG')}<br>العنوان: ${esc(o.address)} ${esc(o.area||'')}<br>الدفع: ${esc(o.payment_method)}${o.notes?'<br>ملاحظات: '+esc(o.notes):''}</p>
+<details><summary>التفاصيل</summary><p>${new Date(o.created_at).toLocaleString('en-US')}<br>العنوان: ${esc(o.address)} ${esc(o.area||'')}<br>الدفع: ${esc(o.payment_method)}${o.notes?'<br>ملاحظات: '+esc(o.notes):''}</p>
 ${o.order_items.map(i=>`<div class="l"><span>${esc(i.product_name)} × ${w(i.quantity_kg)}</span><span>${n(i.line_total)} ج</span></div>`).join('')}
 <p>المجموع ${n(o.subtotal)} · خصم ${n(o.discount)}${o.coupon_code?' ('+esc(o.coupon_code)+')':''} · توصيل ${n(o.delivery_fee)}</p>
-<div class="r"><label>مصاريف التوصيل (ج)<input type="number" min="0" data-fee value="${+o.delivery_fee||0}"></label><button class="b" data-a="fee">حفظ التوصيل</button></div>
-<a class="b" target="_blank" rel="noopener" href="${wa(o,`مرحباً ${o.customer_name}، بخصوص طلبك ${o.order_number} من كيتشن فاست: ${ST[o.status]}${feeTxt(o)}`)}">واتساب العميل</a>
+<a class="b" target="_blank" rel="noopener" href="${wa(o,`مرحباً ${o.customer_name}، بخصوص طلبك ${o.order_number} من كيتشن فاست: ${ST[o.status]}`)}">واتساب العميل</a>
 ${o.status=='delivered'?` <a class="b" target="_blank" rel="noopener" href="${wa(o,`شكراً لتعاملك مع كيتشن فاست! يسعدنا رأيك في طلبك: ${location.origin}${location.pathname.replace(/[^/]*$/,'')}review.html?t=${o.review_token}`)}">إرسال رابط التقييم</a>`:''}</details></div>`).join(''):'<p class="m">لا توجد طلبات بعد.</p>';
 }
 
@@ -133,8 +131,7 @@ V.onclick=async e=>{
   const b=e.target.closest('[data-a]');if(!b||b.tagName=='INPUT'||b.tagName=='SELECT')return;
   const a=b.dataset.a,c=b.closest('[data-id]'),id=c&&c.dataset.id;
   try{
-    if(a=='fee'){const v=+c.querySelector('[data-fee]').value;if(!(v>=0))return toast('اكتب مبلغ صحيح',1);const sub=+c.dataset.sub,dc=+c.dataset.disc||0;ok(await sb.from('orders').update({delivery_fee:v,total:sub-dc+v}).eq('id',id));toast('تم حفظ التوصيل');await orders();const d=V.querySelector('[data-id="'+id+'"] details');if(d)d.open=true}
-    else if(a=='add'){const o=rd($('np'));if(!o.name.trim()||o.price_per_kg==null)return toast('اكتب الاسم والسعر',1);ok(await sb.from('products').insert(o));toast('تمت الإضافة');go('products')}
+    if(a=='add'){const o=rd($('np'));if(!o.name.trim()||o.price_per_kg==null)return toast('اكتب الاسم والسعر',1);ok(await sb.from('products').insert(o));toast('تمت الإضافة');go('products')}
     else if(a=='save'){ok(await sb.from('products').update(rd(c)).eq('id',id));toast('تم الحفظ')}
     else if(a=='del'){if(!confirm('حذف الصنف نهائياً؟'))return;ok(await sb.from('products').delete().eq('id',id));toast('تم الحذف');go('products')}
     else if(a=='ap'){ok(await sb.from('reviews').update({is_approved:b.dataset.v=='1'}).eq('id',id));go('reviews')}
