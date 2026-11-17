@@ -385,7 +385,8 @@ function cusDraw(){
 }
 V.addEventListener('input',e=>{if(e.target.id=='ofx')OFT=e.target.value});
 V.addEventListener('change',e=>{if(e.target.id=='cfl'){CF=e.target.value;cusDraw()}});
-async function costMap(){try{const r=await sb.from('products').select('name,cost_per_kg');if(r.error)return{};const m={};r.data.forEach(p=>{if(+p.cost_per_kg>0)m[p.name]=+p.cost_per_kg});return m}catch(e){return{}}}
+async function costById(){try{const r=await sb.from('product_costs').select('product_id,cost_per_kg');if(r.error)return null;const m={};r.data.forEach(x=>m[x.product_id]=+x.cost_per_kg);return m}catch(e){return null}}
+async function costMap(){try{const r=await sb.from('product_costs').select('cost_per_kg,products(name)');if(r.error)return{};const m={};r.data.forEach(x=>{if(+x.cost_per_kg>0&&x.products)m[x.products.name]=+x.cost_per_kg});return m}catch(e){return{}}}
 function pfit(dv,cm){let cost=0;dv.forEach(o=>(o.order_items||[]).forEach(i=>{cost+=(cm[i.product_name]||0)*(+i.quantity_kg||0)}));const rev=dv.reduce((s,o)=>s+(+o.subtotal||0)-(+o.discount||0),0);return{cost,rev}}
 
 async function coupons(){
@@ -419,11 +420,12 @@ let CATS=[];
 async function products(){
   CATS=ok(await sb.from('categories').select('*').order('sort_order'));
   const d=ok(await sb.from('products').select('*').order('sort_order'));
-  const hint2=d.length&&!('daily_limit' in d[0])?'<p class="m">لتفعيل الكمية اليومية والكوبونات شغّل ملف kitchen-fast-coupons-daily.sql في Supabase مرة واحدة.</p>':'';
-  const hint=d.length&&!('cost_per_kg' in d[0])?'<p class="m">لتفعيل خانة التكلفة والربح شغّل ملف kitchen-fast-cost.sql في Supabase مرة واحدة.</p>':'';
+  const hint2=(d.length&&!('daily_limit' in d[0])?'<p class="m">لتفعيل الكمية اليومية والكوبونات شغّل ملف kitchen-fast-coupons-daily.sql في Supabase مرة واحدة.</p>':'')+(d.length&&!('min_kg' in d[0])?'<p class="m">لتفعيل الوصف وأقل كمية لكل منتج شغّل ملف kitchen-fast-description-min.sql في Supabase مرة واحدة.</p>':'');
+  const cmap=await costById();
+  const hint=d.length&&!cmap?'<p class="m">لتفعيل خانة التكلفة والربح شغّل ملف kitchen-fast-cost.sql في Supabase مرة واحدة.</p>':'';
   const co=v=>CATS.map(c=>`<option value="${c.id}"${c.id==v?' selected':''}>${esc(c.name)}</option>`).join('');
   V.innerHTML=hint+hint2+`<div class="c" id="np"><b>صنف جديد</b><div class="r"><input data-f="name" placeholder="اسم الصنف"><select data-f="category_id">${co()}</select><input data-f="price_per_kg" type="number" min="0" placeholder="سعر الكيلو"><button class="b" data-a="add">إضافة</button></div></div>`+
-  d.map(p=>`<div class="c" data-id="${p.id}"><div class="r">${p.image_url?`<img class="th" src="${esc(p.image_url)}" alt="">`:'<span class="th"></span>'}<input data-f="name" value="${esc(p.name)}"><select data-f="category_id">${co(p.category_id)}</select><label>السعر / كيلو<input data-f="price_per_kg" type="number" min="0" value="${p.price_per_kg}"></label><label>خصم %<input data-f="discount_percent" type="number" min="0" max="100" value="${p.discount_percent}"></label>${'cost_per_kg' in p?`<label>التكلفة / كيلو<input data-f="cost_per_kg" type="number" min="0" value="${p.cost_per_kg||0}"></label>`:''}${'daily_limit' in p?`<label>الكمية اليومية (كيلو)<input data-f="daily_limit" type="number" min="0" step="0.5" placeholder="بلا حد" value="${p.daily_limit??''}"></label>`:''}</div>
+  d.map(p=>`<div class="c" data-id="${p.id}"><div class="r">${p.image_url?`<img class="th" src="${esc(p.image_url)}" alt="">`:'<span class="th"></span>'}<input data-f="name" value="${esc(p.name)}"><select data-f="category_id">${co(p.category_id)}</select><label>السعر / كيلو<input data-f="price_per_kg" type="number" min="0" value="${p.price_per_kg}"></label><label>خصم %<input data-f="discount_percent" type="number" min="0" max="100" value="${p.discount_percent}"></label>${cmap?`<label>التكلفة / كيلو<input data-c="1" type="number" min="0" value="${cmap[p.id]||0}"></label>`:''}${'daily_limit' in p?`<label>الكمية اليومية (كيلو)<input data-f="daily_limit" type="number" min="0" step="0.5" placeholder="بلا حد" value="${p.daily_limit??''}"></label>`:''}${'min_kg' in p?`<label>أقل كمية للطلب (كيلو)<input data-f="min_kg" type="number" min="0.5" step="0.5" placeholder="نص كيلو" value="${p.min_kg??''}"></label>`:''}${'description' in p?`<label style="grid-column:1/-1">الوصف (بيظهر تحت اسم المنتج)<textarea data-f="description" rows="2" placeholder="سطرين عن المنتج">${esc(p.description||'')}</textarea></label>`:''}</div>
 <div class="r">${[['is_available','متاح'],['is_best_seller','الأكثر طلباً'],['is_new','جديد'],['is_active','ظاهر في المتجر']].map(([k,l])=>`<label><span><input type="checkbox" data-f="${k}"${p[k]?' checked':''}>${l}</span></label>`).join('')}
 <label class="b">رفع صورة<input type="file" accept="image/*" data-a="img" hidden></label><button class="b" data-a="save">حفظ</button><button class="b d" data-a="del">حذف</button></div></div>`).join('');
 }
@@ -449,6 +451,11 @@ async function settings(){
   const z=(s.delivery_zones||[]).map(x=>x.name+' | '+x.fee).join('\n');
   V.innerHTML=`<div class="c" id="st">${SF.map(([k,l])=>`<label>${l}<input data-f="${k}"${k=='min_order'?' type="number" min="0"':''} value="${esc(s[k]??'')}"></label>`).join('')}
 <label>مناطق التوصيل (سطر لكل منطقة: الاسم | السعر)<textarea data-f="zones" rows="4">${esc(z)}</textarea></label>
+<div class="c" style="margin:0"><b class="g">مواعيد استقبال الطلبات (بتوقيت القاهرة)</b>
+<div class="g2"><label>بيفتح الساعة<input data-f="open_from" type="time" value="${esc((s.open_from||'').slice(0,5))}"></label><label>بيقفل الساعة<input data-f="open_to" type="time" value="${esc((s.open_to||'').slice(0,5))}"></label></div>
+<label style="display:flex;gap:8px;align-items:center"><input data-f="force_closed" type="checkbox" style="width:auto"${s.force_closed?' checked':''}> قفل المتجر دلوقتي (بيوقف استقبال الطلبات فوراً)</label>
+<label>رسالة القفل (اختياري)<input data-f="closed_message" value="${esc(s.closed_message||'')}"></label>
+<p class="m" style="margin:0">سيب الساعتين فاضيين لو المتجر شغّال 24 ساعة. لو بتقفل بعد نص الليل اكتب الأوقات عادي (مثلاً من 10 ص إلى 2 ص).</p></div>
 <div><b>صور الهيدر</b><div class="r" id="hr"></div><label class="b">إضافة صورة<input type="file" accept="image/*" data-a="hero" hidden></label></div>
 <button class="b" data-a="ss">حفظ الإعدادات</button></div>`;
   drawHero();
@@ -478,7 +485,7 @@ V.onclick=async e=>{
     else if(a=='iprint')window.print();
     else if(a=='iwa')iwa();
     else if(a=='add'){const o=rd($('np'));if(!o.name.trim()||o.price_per_kg==null)return toast('اكتب الاسم والسعر',1);ok(await sb.from('products').insert(o));toast('تمت الإضافة');go('products')}
-    else if(a=='save'){ok(await sb.from('products').update(rd(c)).eq('id',id));toast('تم الحفظ')}
+    else if(a=='save'){const o=rd(c),ci=c.querySelector('[data-c]');ok(await sb.from('products').update(o).eq('id',id));if(ci)ok(await sb.from('product_costs').upsert({product_id:id,cost_per_kg:+ci.value||0}));toast('تم الحفظ')}
     else if(a=='del'){if(!confirm('حذف الصنف نهائياً؟'))return;ok(await sb.from('products').delete().eq('id',id));toast('تم الحذف');go('products')}
     else if(a=='ap'){ok(await sb.from('reviews').update({is_approved:b.dataset.v=='1'}).eq('id',id));go('reviews')}
     else if(a=='rd'){if(!confirm('حذف التقييم؟'))return;ok(await sb.from('reviews').delete().eq('id',id));go('reviews')}
