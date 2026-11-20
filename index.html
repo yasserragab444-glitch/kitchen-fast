@@ -127,6 +127,7 @@ aside.on{transform:none;visibility:visible}
 #gs{font-size:14px;color:var(--mut)}
 .pd{font-size:14px;color:var(--mut);margin:2px 0 8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .clb{background:#2a0f0f;border-bottom:1px solid #ff7b72;color:#ffb4ad;padding:10px 5vw;text-align:center;font-weight:700}
+#tt{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:var(--gold);color:#000;padding:10px 18px;border-radius:10px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}#tt.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
@@ -231,8 +232,9 @@ function offUpd(c){OFN=c;document.getElementById('ofn').textContent=c;offVis()}
 addEventListener('scroll',offVis,{passive:true});addEventListener('resize',offVis);
 document.getElementById('offb').onclick=function(){document.getElementById('offw').scrollIntoView({behavior:'smooth',block:'start'})};
 function draw(){const O=P.filter(p=>p.old>p.price);$('offw').hidden=!O.length;offUpd(O.length);$('offers').innerHTML=O.slice(0,8).map(p=>card(p,0,1)).join('');$('grid').innerHTML=P.filter(p=>cat=='all'||p.cat==cat).map(p=>card(p)).join('');$('best').innerHTML=(P.some(p=>p.best)?P.filter(p=>p.best):BEST.map(m=>P.find(p=>p.name==m)).filter(Boolean)).slice(0,8).map(p=>card(p,1)).join('')}
+let ttT;function tt(m){let e=$('tt');if(!e){e=document.createElement('div');e.id='tt';e.setAttribute('role','status');document.body.appendChild(e)}e.textContent=m+' اتضاف للسلة ✓';e.classList.add('on');clearTimeout(ttT);ttT=setTimeout(()=>e.classList.remove('on'),1600)}
 const gh=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,a=b.dataset.a,q=qty[i]||mn(P[i]);
-if(a=='m')qty[i]=Math.max(mn(P[i]),q-.5);else if(a=='p')qty[i]=q+.5;else{const p=P[i];cart[p.name]={id:p.id,price:p.price,q:(cart[p.name]?cart[p.name].q:0)+q};qty[i]=mn(p);opn()}
+if(a=='m')qty[i]=Math.max(mn(P[i]),q-.5);else if(a=='p')qty[i]=q+.5;else{const p=P[i];cart[p.name]={id:p.id,price:p.price,q:(cart[p.name]?cart[p.name].q:0)+q};qty[i]=mn(p);tt(p.name)}
 draw();rc()};$('grid').onclick=gh;$('best').onclick=gh;$('offers').onclick=gh;
 function reprice(){Object.keys(cart).forEach(m=>{const p=P.find(x=>x.name==m);if(!p||!p.ok)delete cart[m];else{cart[m].id=p.id;cart[m].price=p.price;if(cart[m].q<mn(p))cart[m].q=mn(p)}});rc()}
 function rc(){const k=Object.keys(cart);let t=0;try{localStorage.setItem('kf_cart',JSON.stringify(cart))}catch(e){}$('cn').textContent=n(k.length);
