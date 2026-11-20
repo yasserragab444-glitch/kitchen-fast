@@ -89,7 +89,7 @@ summary{cursor:pointer;color:var(--gold)}
 <body>
 <div id="login">
 <form id="lf"><h1 class="g" style="margin:0">كاشير كيتشن فاست</h1>
-<label>الإيميل<input id="em" type="email" autocomplete="username" required></label>
+<label>اسم المستخدم<input id="em" type="text" autocomplete="username" autocapitalize="none" dir="ltr" required></label>
 <label>كلمة السر<input id="pw" type="password" autocomplete="current-password" required></label>
 <p class="err" id="le"></p>
 <button class="b" type="submit">دخول</button></form>
@@ -134,8 +134,8 @@ async function enter(){
   $('login').hidden=true;$('app').hidden=false;go('orders');poll();if(!poll.t){poll.t=setInterval(poll,20000);try{sb.channel('ord').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},()=>setTimeout(poll,1500)).subscribe()}catch(e){}}
 }
 $('lf').onsubmit=async e=>{e.preventDefault();$('le').textContent='';
-  const r=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
-  if(r.error)return $('le').textContent='الإيميل أو كلمة السر غير صحيحة.';
+  const r=await sb.auth.signInWithPassword({email:(v=>v.includes('@')?v:v+'@kitchenfast.com')($('em').value.trim().toLowerCase()),password:$('pw').value});
+  if(r.error)return $('le').textContent='اسم المستخدم أو كلمة السر غير صحيحة.';
   enter()};
 $('lo').onclick=async()=>{await sb.auth.signOut();location.reload()};
 $('snd').onclick=()=>{ding();toast('الصوت شغّال')};$('alb').onclick=stopAl;
