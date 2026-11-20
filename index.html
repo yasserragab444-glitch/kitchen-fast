@@ -262,7 +262,6 @@ const send=t=>window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(t),'_b
 var ZS=[];
 function zu(t){var z=(ZS||[])[$('zn').value],e=$('dn');e.textContent=z?'التوصيل لـ '+z.name+': '+(z.fee?n(z.fee)+' ج':'مجاناً')+' — الإجمالي مع التوصيل: '+n((t||0)+z.fee)+' ج':'مصاريف التوصيل بتتحدد حسب منطقتك، وهنأكدها معاك على واتساب مع تأكيد الطلب.'}
 $('zn').onchange=()=>zu(rc());
-fetch(SB+'/rest/v1/store_settings?select=delivery_zones&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{var z=d[0]&&d[0].delivery_zones;if(!Array.isArray(z)||!z.length)return;ZS=z.filter(x=>x&&x.name).map(x=>({name:String(x.name),fee:+x.fee||0}));if(!ZS.length)return;$('zn').innerHTML='<option value="">اختار منطقتك</option>'+ZS.map((x,i)=>`<option value="${i}">${esc(x.name)} — ${x.fee?n(x.fee)+' ج':'مجاناً'}</option>`).join('');$('zl').hidden=false;rc()}).catch(()=>{});
 $('cf').onsubmit=async e=>{e.preventDefault();if(CLOSED)return $('er').textContent=CLOSEDMSG;const k=Object.keys(cart),nm=$('nm').value.trim(),ph=$('ph').value.trim(),ad=$('ad').value.trim(),pm=document.querySelector('[name=py]:checked').value,lk=$('lk').value.trim(),loc=GL||lk,nt=[$('nt').value.trim(),loc?'📍 الموقع: '+loc:'',$('of2').checked?'📣 يقبل العروض':''].filter(Boolean).join('\n');
 if(!k.length)return $('er').textContent='ضيف صنف واحد على الأقل للسلة.';
 if(!nm)return $('er').textContent='اكتب اسمك.';
@@ -288,6 +287,7 @@ if(!d)return $('oer').textContent='اكتب اللي محتاجه.';
 $('oer').textContent='';send(`طلب مناسبة من كيتشن فاست\nالمناسبة: ${$('oe').value}\nعدد الأشخاص: ${p}\nالمطلوب: ${d}\n\nنرجو تحديد السعر.`)};
 draw();rc();
 const H={headers:{apikey:KEY}};
+fetch(SB+'/rest/v1/store_settings?select=delivery_zones&id=eq.1',H).then(r=>r.ok?r.json():Promise.reject()).then(d=>{var z=d[0]&&d[0].delivery_zones;if(!Array.isArray(z)||!z.length)return;ZS=z.filter(x=>x&&x.name).map(x=>({name:String(x.name),fee:+x.fee||0}));if(!ZS.length)return;$('zn').innerHTML='<option value="">اختار منطقتك</option>'+ZS.map((x,i)=>`<option value="${i}">${esc(x.name)} — ${x.fee?n(x.fee)+' ج':'مجاناً'}</option>`).join('');$('zl').hidden=false;rc()}).catch(()=>{});
 const PQ=c=>fetch(SB+'/rest/v1/products?select='+c+',categories(slug)&order=sort_order',H).then(r=>r.ok?r.json():Promise.reject()),PB='id,name,price_per_kg,discount_percent,is_available,image_url,is_best_seller,is_new';
 PQ(PB+',description,min_kg').catch(()=>PQ(PB+',description')).catch(()=>PQ(PB)).then(d=>{if(d.length){P=d.map(x=>({id:x.id,cat:x.categories&&x.categories.slug,name:x.name,price:Math.round(x.price_per_kg*(1-x.discount_percent/100)*100)/100,ok:x.is_available,img:x.image_url,best:x.is_best_seller,old:+x.price_per_kg,nw:x.is_new,desc:x.description||'',min:+x.min_kg||0}));reprice();draw();loadRem()}}).catch(()=>{});
 const safe=u=>/^https?:\/\//i.test(u||'');
