@@ -42,7 +42,7 @@ async function saveExpense(b){const o=rd(b);
 async function stock(){
  const r=ok(await sb.from('material_stock').select('*').eq('is_active',true).order('kind').order('name'));
  const tv=r.reduce((a,x)=>a+Math.max(0,+x.balance)*+x.avg_cost,0);
- V.innerHTML=`<div class="c"><b class="g">قيمة المخزون الحالي: ${f2(tv)} ج</b><p class="m" style="margin:4px 0 0">الرصيد = المشتريات − المستهلك (الخصم عند البيع والجرد في المراحل الجاية). متوسط السعر = إجمالي ما دفعته ÷ إجمالي الكمية المشتراة.</p></div>`
+ V.innerHTML=`<div class="c"><b class="g">قيمة المخزون الحالي: ${f2(tv)} ج</b><p class="m" style="margin:4px 0 0">الرصيد = المشتريات − المستهلك (بيتخصم تلقائياً عند تسليم الطلبات، والجرد في المرحلة الجاية). متوسط السعر = إجمالي ما دفعته ÷ إجمالي الكمية المشتراة.</p></div>`
  +(r.length?r.map(x=>{const low=+x.min_stock>0&&+x.balance<=+x.min_stock;
   return`<div class="c" data-id="${x.id}"><b>${esc(x.name)}</b> <span class="m">${x.kind=='pack'?'تغليف':'خامة'} · ${UN[x.unit]}</span><div class="r"><span${low?' style="color:#ff6a6a"':''}>الرصيد: ${f2(x.balance)} ${UN[x.unit]}${low?' ⚠️ قارب على الخلاص':''}</span><span>متوسط السعر: ${f2(x.avg_cost)} ج</span><span>القيمة: ${f2(Math.max(0,+x.balance)*+x.avg_cost)} ج</span></div><div class="g2"><label>نسبة الهالك %<input data-f="waste" type="number" min="0" max="99" value="${+x.waste_pct}"></label><label>حد التنبيه (${UN[x.unit]})<input data-f="min" type="number" min="0" step="any" value="${+x.min_stock}"></label></div><button class="b" data-x="ms">حفظ</button></div>`}).join(''):'<p class="m">لسه مفيش خامات. سجّل أول عملية شراء من تبويب المشتريات والمصروفات.</p>')}
 
@@ -62,3 +62,4 @@ V.addEventListener('input',e=>{const f=$('fp');if(!f||!f.contains(e.target))retu
 TABS.buy=['المشتريات والمصروفات',buy];TABS.stock=['المخزون',stock];
 $('nav').innerHTML=Object.entries(TABS).map(([k,v])=>`<button data-k="${k}">${v[0]}</button>`).join('');
 }catch(e){console.error('admin-purchases:',e)}})();
+;['admin-costs.js','admin-stockreport.js'].forEach(f=>{try{const s=document.createElement('script');s.src=f+'?v=1';s.async=false;document.head.appendChild(s)}catch(e){}});
